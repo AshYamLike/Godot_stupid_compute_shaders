@@ -30,6 +30,7 @@ func _ready() -> void:
 1. Select the StupidComputeShader node that you want a GLSL file for
 2. Click on the Create File checkbox in the Inspector (don't worry if it doesn't appear checked, its value gets put back to false after the file is generated)
 3. Open the file in an external text editor and make the changes you want
+4. After it's been imported into Godot then set the GLSL file for the shader otherwise you'll get an error like Stupid compute shader.gd:105 @ create_shader(): Resource file not found: res://StupidComputeShader.glsl
 
 Note: Godot will sometimes not import the file automatically with this method so you might have close and then reopen the project before it appears in the editor
 Note 2: If you want you can also copy the Generated_Glsl text into a file manually, it'll get you to the same place
