@@ -9,7 +9,7 @@ Drag the folder "Stupid_compute_shader" into your "addons" folder in your godot 
 1. Add the StupidComputeShader node to your scene 
 2. Select a GLSL file in the editor (you can skip this step for now if you want to generate one)
 3. Give the shader a unique ID by setting the Shader_Id variable in the editor (it will be used to set the binding for the shader)
-4. Set the data the shader will use by giving the Data array values (either floats or ints and it can be of any size your hardware will allow)
+4. Set the data the shader will use by giving the Data array values in your script (either floats or ints and it can be of any size your hardware will allow)
 5. Call the .run method on the node. For example: `stupid_compute_node_name.run()` and saving the return value of that function as output
 
 ### Example Usage
@@ -26,16 +26,14 @@ func _ready() -> void:
 	print(modified_storage_buffer)
 ```
 
-
 ## How to generate GLSL code from StupidComputeShader node in the editor
-1. In your addons folder look for the "Stupid_compute_shader" folder and open the script generate_glsl_file.gd
-2. Navigate to the scene that contains one or more StupidComputeShader nodes (set these nodes up the way you want just leave the GLSL_File variables empty for now) 
-3. Open the generate_glsl_file.gd script while also having your scene open containing the StupidComputeShader node (make sure when you go to 2D/3D view the scene with the StupidComputeShader node is the one that appears)
-4. Go to the script view and press Ctrl + Shift + x
-5. Open the project in a file manager and check if the GLSL file is generated for you (it will have the same name as your StupidComputeShader node and be located in the root of the directory)
+1. Select the StupidComputeShader node that you want a GLSL file for
+2. Click on the Create File checkbox in the Inspector (don't worry if it doesn't appear checked, its value gets put back to false after the file is generated)
+3. Open the file in an external text editor and make the changes you want
 
-Note: Godot will sometimes not import the file automatically so you might have close and then reopen the project before it appears in the editor
-I know this sucks... I'm sorry I will fix this when I get the time
+Note: Godot will sometimes not import the file automatically with this method so you might have close and then reopen the project before it appears in the editor
+Note 2: If you want you can also copy the Generated_Glsl text into a file manually, it'll get you to the same place
+
 
 ### Example of generated GLSL file
 ```GLSL
@@ -89,8 +87,16 @@ void main() {
 }
 ```
 
+## Legacy: How to generate GLSL code from StupidComputeShader in a big batch (all StupidComputeShader nodes will be given a GLSL file)
+1. In your addons folder look for the "Stupid_compute_shader" folder and open the script generate_glsl_file.gd
+2. Navigate to the scene that contains one or more StupidComputeShader nodes (set these nodes up the way you want just leave the GLSL_File variables empty for now) 
+3. Open the generate_glsl_file.gd script while also having your scene open containing the StupidComputeShader node (make sure when you go to 2D/3D view the scene with the StupidComputeShader node is the one that appears)
+4. Go to the script view and press Ctrl + Shift + x
+5. Open the project in a file manager and check if the GLSL file is generated for you (it will have the same name as your StupidComputeShader node and be located in the root of the directory)
+
+
 ## Stuff thats coming (probably)
-- Fix the Hell that is generating the GLSL file and instead just making it a callable function
+- More error checking
 
 
 ## License
