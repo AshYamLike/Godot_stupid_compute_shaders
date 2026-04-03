@@ -26,6 +26,14 @@ enum glsl_array_datatype {int32,float32}
 ##Don't set this in the editor... i mean you can but like just use code
 @export var Shader_data : Array
 
+#GLSL file creation stuff
+##Generated code that should be used for this compute shader (paste this code into a external text editor and save the file in the project dir as a .glsl file)
+@export_multiline var Generated_GLSL: String = ""
+
+##If ticked (it will immediately be changed back to false so you won't see the blue tick at all) it will create a file with the name of the node plus the .glsl extention with the generated code already in it 
+##Note: Godot will sometimes not import the file automatically with this method so you might have close and then reopen the project before it appears in the editor
+@export var Create_file :bool = false
+
 @export_group("Advanced")
 
 ##Tells node to use the advanced settings and ignore normal settings
@@ -42,6 +50,8 @@ enum glsl_array_datatype {int32,float32}
 @export var Invocations: Vector3
 @export var GLSL_datatype_adv: glsl_array_datatype
 @export_file("*.glsl") var GLSL_File_adv : String
+
+
 
 #Runtime vars
 var threadgroups : Vector3 #The amount of invocations that are run
@@ -65,8 +75,6 @@ var Compute_rendering_device
 func assign_vars():
 	
 	
-
-	print(glsl_file)
 	if Use_Advanced_settings == false:
 		buffer_size = Data.size()*4
 		set_val = 0
@@ -95,7 +103,6 @@ func create_rendering_device() -> RenderingDevice:
 
 func create_shader(file : String, rendering_dev : RenderingDevice) -> RID:
 	var shader_file := load(glsl_file)
-	print(shader_file)
 	var shader_spirv: RDShaderSPIRV = shader_file.get_spirv()
 	return rendering_dev.shader_create_from_spirv(shader_spirv)
 
@@ -166,3 +173,53 @@ func run() -> Array:
 	
 	
 	return output
+#Generates glsl test
+func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		
+		
+		#This was all just modified from the legacy way of doing this so... its not great... yeah sorry
+		
+		var local_size_x :int 
+		var bind :int
+		var data_string : String = ""
+				
+		if Use_Advanced_settings:
+			local_size_x = Invocations.x
+		else:
+			local_size_x = 64
+			bind = Shader_ID
+			set_value = 0
+		
+		if GLSL_datatype == glsl_array_datatype.int32:
+			data_string = "int"
+		if GLSL_datatype == glsl_array_datatype.float32:
+			data_string = "float"
+		
+		var generated: String = ""
+
+		
+		#Just realized i did this in the worst possible way... well to late now
+		generated = generated+"#[compute]\n"
+		generated = generated+"#version 450\n\n"
+		
+		generated = generated+"// Invocations in the (x, y, z) dimension\n"
+		generated = generated+"layout(local_size_x = "+str(local_size_x)+", local_size_y = "+str(1)+", local_size_z = "+str(1)+") in;\n\n"
+		
+		generated = generated+"layout(set = "+str(set_value)+", binding = "+str(bind)+", std430) restrict buffer DataBuffer {\n"
+		generated = generated+"	"+ data_string +" data[]; //Think of this as a struct with only one member\n\n}"
+		generated = generated+"data_buffer; //Creates one instance of this so called 'struct'\n\n\n"
+		generated = generated+"// The code we want to execute in each invocation or 'thread'\n"
+		generated = generated+"void main() {\n"
+		generated = generated+"	// gl_GlobalInvocationID.x uniquely identifies this invocation across all work groups \n"
+		generated = generated+"	// data is an array inside data_buffer that contains all input data and can be written to as well (at the end of the shader it will be returned as the output)\n"
+		generated = generated+"	uint idx = gl_GlobalInvocationID.x; //idx is the current index\n"
+		generated = generated+"	" + data_string + " current_value = data_buffer.data[idx];\n}"
+		Generated_GLSL = generated
+		
+		#Not the best I'll be first to admit but I'm tired 
+		if Create_file == true:
+			var file = FileAccess.open("res://"+self.name+".glsl",FileAccess.WRITE)
+			file.store_string(generated)
+			file.close()
+			Create_file = false
